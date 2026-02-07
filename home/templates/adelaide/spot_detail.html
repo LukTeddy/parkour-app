@@ -1,0 +1,135 @@
+{% extends "home/base.html" %}
+{% block content %}
+  {% load tz %}
+  <h1>{{ spot.name }}</h1>
+  <p>{{ spot.description }}</p>
+  <a id="openMapLink" href="" target="_blank" class="coord-button">Open Spot in Google Maps</a>
+  <h2>Discussion</h2>
+  <div>
+    <button class="nav-button" id="media-toggle" onclick="toggleSection('media')">Show Media</button>
+    <button class="nav-button" id="challenge-toggle" onclick="toggleSection('challenge')">Show Challenges</button>
+  </div>
+
+  <div id="media-comments" style="display: none; border: 2px solid #101010;">
+    <h3>Media</h3>
+    <div style="overflow-y: auto; height: 500px;">
+      {% for comment in comments %}
+        {% if not comment.is_challenge %}
+
+          <div class="comment">
+            <p><strong>{{ comment.user.username }}</strong> said:</p>
+            <p>{{ comment.text }}</p>
+            <p><small>Posted on {{ comment.created_at|localtime|date:"F j, Y, g:i a" }})</small></p>
+
+            <div class="comment-media">
+              {% for media in comment.media.all %}
+                {% if media.media_type == 'image' %}
+                  <img src="{{ media.media_file.url }}" alt="Image attached to comment" width="300" />
+                {% elif media.media_type == 'video' %}
+                  <video controls width="100%">
+                    <source src="{{ media.media_file.url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                  </video>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            {% if comment.user == user %}
+              <form method="POST" action="{% url 'delete-comment' comment.id %}">
+                {% csrf_token %}
+                <button type="submit">Delete Comment</button>
+              </form>
+            {% endif %}
+          </div>
+
+        {% endif %}
+      {% empty %}
+        <p>No comments yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div id="challenge-comments" style="display: none; border: 2px solid #101010;">
+    <h3>Challenges</h3>
+    <div style="overflow-y: auto; height: 500px;">
+      {% for comment in comments %}
+        {% if comment.is_challenge %}
+
+          <div class="comment">
+            <p><strong>{{ comment.user.username }}</strong> said:</p>
+            <p>{{ comment.text }}</p>
+            <p><small>Posted on {{ comment.created_at|localtime|date:"F j, Y, g:i a" }})</small></p>
+
+            <div class="comment-media">
+              {% for media in comment.media.all %}
+                {% if media.media_type == 'image' %}
+                  <img src="{{ media.media_file.url }}" alt="Image attached to comment" width="300" />
+                {% elif media.media_type == 'video' %}
+                  <video controls width="100%">
+                    <source src="{{ media.media_file.url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                  </video>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            {% if comment.user == user %}
+              <form method="POST" action="{% url 'delete-comment' comment.id %}">
+                {% csrf_token %}
+                <button type="submit">Delete Comment</button>
+              </form>
+            {% endif %}
+
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if user.is_authenticated %}
+    <h3>Add a Comment</h3>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ comment_form.as_p }}
+
+      <h4>Media (Optional)</h4>
+      {{ media_form.as_p }}
+
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  {% else %}
+    <a href="{% url 'login' %}">Sign in to upload or discuss</a>
+  {% endif %}
+
+  <script>
+    const latitude = {{ spot.latitude }};
+    const longitude = {{ spot.longitude }};
+    const googleMapsLink = "https://www.google.com/maps?q=" + latitude + "," + longitude;
+    const mapLink = document.getElementById('openMapLink');
+    mapLink.href = googleMapsLink;
+
+    function toggleSection(section) {
+      const mediaComments = document.getElementById('media-comments');
+      const challengeComments = document.getElementById('challenge-comments');
+      const mediaButton = document.getElementById('media-toggle');
+      const challengeButton = document.getElementById('challenge-toggle');
+
+      if (section === 'media') {
+        mediaComments.style.display = 'block';
+        challengeComments.style.display = 'none';
+        mediaButton.classList.add('active');
+        mediaButton.classList.remove('inactive');
+        challengeButton.classList.add('inactive');
+        challengeButton.classList.remove('active');
+      } else if (section === 'challenge') {
+        mediaComments.style.display = 'none';
+        challengeComments.style.display = 'block';
+        mediaButton.classList.add('inactive');
+        mediaButton.classList.remove('active');
+        challengeButton.classList.add('active');
+        challengeButton.classList.remove('inactive');
+      }
+    }
+    toggleSection('media');
+   </script>
+{% endblock content %}

@@ -1,0 +1,38 @@
+# Python bytecode files
+*.pyc
+*.pyo
+__pycache__
+
+# Django migrations
+*/migrations/*
+
+# Secret files like secrets.json
+secrets.json
+user_backup.json
+
+# Local configuration files
+.env
+*.env
+
+# IDE config files (e.g., PyCharm, VS Code)
+.idea/
+.vscode/
+
+# Virtual environment folder
+venv/
+env/
+.env/
+
+# Database files (e.g., SQLite)
+db.sqlite3
+
+# Backup files (like dumpdata files)
+*.json
+*.bak
+
+# Static and media files (optional, depending on your setup)
+/static/
+/media/*
+!/media/
+
+parkour-map-backup.git/

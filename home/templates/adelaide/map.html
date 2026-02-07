@@ -1,0 +1,121 @@
+{% extends "home/base.html" %}
+
+{% block title %}Adelaide Zoomable Map{% endblock title %}
+
+{% block content %}
+  <h1>Adelaide Map</h1>
+  <script>
+    document.title = "Adelaide Zoomable Map";
+  </script>
+  <h3>Locate Your Position</h3>
+  <button onclick="startTracking()">Show My Location</button>
+
+  {% if user.is_authenticated %}
+      <a class="nav-item nav-link" href="/spots/add">
+        <button style="background-color:black; color:#00FF00; border-radius:20px; width:80px; height:50px; font-size: 17px;">Add Spot</button>
+      </a>
+  {% else %}
+    <a class="nav-item nav-link" href="{% url 'login' %}">Sign in to add spots.</a>
+  {% endif %}
+  <p>{{ MEDIA_URL }}</p>
+  <div class="map-container">
+    <div id="map"></div>
+  </div>
+
+
+  <style>
+    #map{
+      height: 80vh;
+      width: 80vw;
+      border-radius: 15px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      margin-top: 20px; /* didn't have before */
+    }
+
+    .map-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: auto;
+    }
+  </style>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    const initialZoom = 12; // should be 14
+    const minPanZoom = 12; // should be 15
+
+    const bounds = [
+      [-34.86, 138.56], // southwest (was -34.88, 138.58)
+      [-34.97, 138.64]  // northeast (was -34.95, 138.62)
+    ];
+
+    const map = L.map("map", {
+      minZoom: initialZoom,
+      maxBounds: bounds,
+      maxBoundsViscosity: 1.0,
+      worldCopyJump: false,
+    }).setView([-34.92029584629693, 138.601187963849], initialZoom);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      noWrap: true
+    }).addTo(map);
+
+    {% block spot_markers %}{% endblock %}
+
+    map.dragging.disable();
+    map.on("zoomend", () => {
+      if (map.getZoom() >= minPanZoom) {
+        map.dragging.enable();
+      } else {
+        map.dragging.disable();
+      }
+    });
+
+    let locationMarker;
+    let isTracking = false;
+
+    const locationIcon = L.icon({
+      iconUrl: '/media/player_icon.png',
+      iconSize: [30, 30],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
+    });
+
+    let lastUpdateTime = 0;
+    const updateInterval = 1000;
+
+    function startTracking(){
+      if (isTracking){
+        return
+      }
+      isTracking = true;
+      locationMarker = L.marker([0, 0], {icon: locationIcon}).addTo(map);
+      locationMarker.bindPopup("<strong>You are here.</strong>");
+
+      if (navigator.geolocation){
+        const geoOptions = {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        };
+
+        navigator.geolocation.watchPosition(
+          function(position) {
+            const { latitude, longitude } = position.coords;
+            locationMarker.setLatLng([latitude, longitude]);
+          },
+          function(error){
+            console.error("Error getting geolocation: ", error);
+            alert("Could not retrieve your location. Please ensure location services are enabled.");
+          },
+          geoOptions
+        );
+      }
+    }
+  </script>
+{% endblock content %}

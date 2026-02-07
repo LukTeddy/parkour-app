@@ -1,0 +1,30 @@
+{% extends "home/base.html" %}
+
+{% block content %}
+  <h2>Add a New Spot</h2>
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="button" onclick="useCurrentLocation()">Use Current Location</button>
+    <button type="submit">Add Spot</button>
+  </form>
+
+  <a href="{% url 'spot-list' %}" style="color: cyan">Back to Spot List</a>
+  <script>
+    function useCurrentLocation(){
+      if (navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(function(position){
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          document.getElementById('id_latitude').value = latitude;
+          document.getElementById('id_longitude').value = longitude;
+        }, function(error){
+          alert("Error getting your location. Please enable location services or enter coordinates.");
+        });
+      } else{
+        alert("Geolocation is not supported by your browser.");
+      }
+    }
+  </script>
+{% endblock content %}

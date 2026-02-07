@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Parkour Map{% endblock %}</title>
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+
+        .site{
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .header {
+            width: 100%;
+            height: 80px;
+            display: block;
+            background-color: #101010;
+        }
+
+        .inner_header{
+            width: 90%;
+            height: 100%;
+            display: flex;
+            margin: 0 auto;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo_container{
+            height: 100%;
+            display: table;
+            float: left;
+        }
+
+        .logo_container h1{
+            color: white;
+            height: 100%;
+            display: table-cell;
+            vertical-align: middle;
+            font-size: 32px;
+            font-weight: 200;
+        }
+
+        .logo_container h1 span{
+            font-weight: 800;
+        }
+
+        .navigation{
+            float: right;
+            height: 100%;
+        }
+
+        .navigation a{
+            height: 100%;
+            float: left;
+            display: table;
+            padding: 0px 20px;
+        }
+
+        .navigation a:last-child{
+            padding-right: 0;
+        }
+
+        .navigation a li{
+            display: table-cell;
+            vertical-align: middle;
+            height: 100%;
+            color: white;
+            font-size: 16px;
+        }
+        .logout-form {
+            display: inline-block;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            padding: 10px 20px;
+            cursor: pointer;
+            display: table-cell;
+            vertical-align: middle;
+            height: 100%;
+        }
+
+        .logout-btn:hover {
+            background-color: #333;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .content-container {
+            flex-grow: 1;
+            padding: 100px;
+            border-top: 5px dashed cyan;
+            border-bottom: 5px dashed cyan;
+        }
+
+        .nav-button {
+          opacity: 0.5;
+          transform: scale(1);
+          transition: all 0.3s ease-in-out;
+          padding: 10px 20px;
+          pointer-events: auto;
+          min-width: 120px;
+          min-height: 40px;
+          display: inline-block;
+        }
+
+        .nav-button.inactive {
+          opacity: 0.5;
+          pointer-events: auto;
+        }
+
+        .nav-button.active {
+          opacity: 1;
+          transform: scale(1.2);
+          pointer-events: none;
+        }
+
+        .comment{
+            border-top: 2px solid #101010;
+            border-bottom: 2px solid #101010;
+            border-left: 2px solid #101010;
+            border-right: 2px solid #101010;
+            padding: 10px;
+            background-color: white;
+            margin: 20px;
+        }
+
+        .comment-media img,
+        .comment-media video {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .comment-media img,
+        .comment-media video {
+            max-width: 500px;
+        }
+
+        @media only screen and (max-width: 600px){
+            .site{
+                width: 100%;
+                margin = 0;
+                padding = 0;
+            }
+
+            .logo_container h1 {
+                font-size: 1.5rem;
+            }
+
+            .navigation{
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .navigation a{
+                padding 10px 0;
+            }
+
+            .navigation a li{
+                font-size: 0.9rem;
+            }
+
+            .header {
+                padding: 20px 0;
+                height: auto;
+            }
+        }
+
+        @media only screen and (min-width: 601px){
+            .site{
+                width: 100%;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .navigation{
+                flex-direction: row;
+                justify-content: flex-end;
+            }
+
+            .navigation a{
+                padding 0 20px;
+            }
+        }
+
+        @media only screen and (min-width: 992px){
+            .site{
+                width: 100%;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body style="background-color:crimson;">
+    <div class="site">
+        <header>
+            <div class="header">
+                <div class="inner_header">
+                    <div class="logo_container">
+                        <h1>PARKOUR<span>MAP</span></h1>
+                    </div>
+                    <ul class="navigation">
+                        <a href="{% url 'home-menu' %}"><li>Home</li></a>
+                        <a href="/spots"><li>Map</li></a>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'profile' %}"><li>Profile</li></a>
+                            <form method="POST" action="{% url 'logout' %}" class="logout-form">
+                                {% csrf_token %}
+                                <button type="submit" class="logout-btn">Log Out</button>
+                            </form>
+                        {% else %}
+                            <a href="/login"><li>Login</li></a>
+                            <a href="/register"><li>Sign Up</li></a>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </header>
+        <main>
+            <div class="content-container">
+                {% block content %} {% endblock content %}
+            </div>
+        </main>
+        <footer style="color: white; background-color: #101010">
+            author: Lukaz Solding<br>
+            &copy; copyright reserved<br>
+            <a href="mailto:email@email.com" style="color: cyan">email@email.com</a>
+        </footer>
+    </div>
+</body>
+</html>

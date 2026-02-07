@@ -1,0 +1,8 @@
+{% extends "adelaide/map.html" %}
+
+{% block spot_markers %}
+  {% for spot in spots %}
+    L.marker([{{ spot.latitude }}, {{ spot.longitude }}]).addTo(map)
+      .bindPopup("<a href='/spots/{{ spot.id }}'><strong>{{ spot.name }}</strong></a><br>{{ spot.description }}");
+  {% endfor %}
+{% endblock spot_markers %}
