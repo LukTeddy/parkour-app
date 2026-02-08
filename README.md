@@ -16,14 +16,3 @@ Deploying my website required both the functionality of Linode for server hostin
 ## Optimisations
 _Future development will be described here._
 
-## Lessons Learned:
-During the creation of this project I learned quite a bit about HTML and CSS and how they interact with each other.
-
-I also learnt how to deploy a website and the consequences of deploying certain aspects. 
-
-I spent quite a while learning how to build, update and delete data and how servers handle that data.
-
-I am hoping to work more on web development within the future, and will hopefully be regularly updating this project in
-
-the future to make it accessible to all users, optimised and complete to my and users' satisfaction. Thank You.
-
